@@ -1,0 +1,14 @@
+
+
+
+
+
+
+# Pieces Colors
+BLACK = "BLACK"
+WHITE = "WHITE"
+
+BOARD_WIDTH = 8
+BOARD_HEIGHT = 8
+
+MAX_RANGE = max(BOARD_WIDTH, BOARD_HEIGHT)
