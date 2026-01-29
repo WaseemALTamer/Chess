@@ -16,10 +16,13 @@ class Board:
         self.grid: list[list[Piece|None]] = [[None]*width for _ in range(height)] # we need to set it up manually later
 
         self.move_index:int = 0 # this will increament by 1 each time
-        self.special_moves:list[callable] = [] # this will hold the special moves that you can excuate on the board
+        self.special_moves:dict[callable] = {} # this will hold the special moves that you can excuate on the board
         
         self.killed_pieces:list[Piece] = [] # this will store the dead pieces that leave the board
+        
         self.on_state_change: list[callable] = [] # this will be triggered when the state of the board changes
+                                                  # this will excuate after a move happen  after the move_idex
+                                                  # changes
 
 
 
@@ -28,6 +31,8 @@ class Board:
             Populate the board in standard 8x8 chess arrangement. this will only
             work if the board has a width and height of 8x8
         """
+        self.width = 8
+        self.height = 8
 
         # to make things simpler and more readable we recreate the array and put everything in order
         self.grid = [
@@ -107,6 +112,9 @@ class Board:
         for func in self.on_state_change:
             func()
 
+    
+
+
 
     def print_grid(self, cell_width=12):
         """
@@ -123,7 +131,22 @@ class Board:
 
                 print(name.ljust(cell_width), end="")
             print()  # newline ONLY at end of row
-            
+
+
+    def coord_diff(self, pos_1: tuple[int, int], pos_2: tuple[int, int]) -> tuple[int, int]:
+        """
+            Returns the difference vector from a to b.
+        """
+        return (pos_2[0] - pos_1[0], pos_2[1] - pos_1[1])
+    
+
+    def coord_mid(self, pos_1: tuple[int, int], pos_2: tuple[int, int]) -> tuple[int, int]:
+        """
+            Returns the midpoint between two coordinates.
+            Assumes the midpoint lies on integer coordinates.
+        """
+        return ((pos_1[0] + pos_2[0]) // 2, (pos_1[1] + pos_2[1]) // 2)
+                
 
 
 
