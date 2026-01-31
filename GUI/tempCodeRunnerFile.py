@@ -1,0 +1,1 @@
+self.render_surface:pygame.Surface = None

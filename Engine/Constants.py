@@ -15,9 +15,13 @@ MAX_RANGE = max(BOARD_WIDTH, BOARD_HEIGHT)
 
 
 # states
-
 ALIVE = "ALIVE"
 DEAD = "DEAD"
+
+WHITE_WON = "WHITE_WON"
+BLACK_WON = "BLACK_WON"
+STALEMATE = "STALEMATE"
+
 
 
 # Special Moves these will help identify the special moves in a dictionary
