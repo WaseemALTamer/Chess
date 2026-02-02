@@ -4,7 +4,7 @@
 
 
 # this class is based on the Uniform Transition class 
-from Uniform import Uniform
+from .Uniform import Uniform
 
 
 
@@ -24,7 +24,7 @@ class EaseInOut:
 
 
         self.starting_value:float = 0
-        self.ending_value:float = 0
+        self.ending_value:float = 1
         self.current_value:float = 0
 
         self.damping:float = 2
@@ -81,6 +81,9 @@ class EaseInOut:
 
     def stop_transition(self):
         self.uniform_transition.stop_transition()
+
+    def reset_transition(self):
+        self.uniform_transition.reset_transition()
 
     def update(self):
         self.uniform_transition.update()

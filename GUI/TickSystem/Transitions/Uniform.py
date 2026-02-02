@@ -1,4 +1,4 @@
-from TickController import TickController
+from .TickController import TickController
 
 
 
@@ -50,13 +50,13 @@ class Uniform:
         else:
             self.duration_time_stamp += elapsed_time_seconds
 
-        if self.duration_time_stamp >= self.duration:
+        if self.duration_time_stamp > self.duration:
             self.duration_time_stamp = self.duration
             self.current_value = self.ending_value
             self.is_running = False
 
 
-        if self.duration_time_stamp <= 0:
+        if self.duration_time_stamp < 0:
             self.duration_time_stamp = 0
             self.current_value = self.starting_value
             self.is_running = False
@@ -100,6 +100,9 @@ class Uniform:
     def stop_transition(self):
         self.is_running = False
 
+
+    def reset_transition(self):
+        self.duration_time_stamp = 0
 
 
 

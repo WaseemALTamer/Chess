@@ -83,11 +83,10 @@ class Window():
         self.main_loop_state = True
         while self.main_loop_state:
 
-
+            
             delta_time = self.tick_controller.wait_for_tick()
 
-
-            # we dont quite let the code flush until we hit quit natrually
+            
 
             # excuate the
             for event in pygame.event.get():
@@ -95,7 +94,7 @@ class Window():
 
                 # Window
                 if event.type == pygame.QUIT: # we dont expose the quite event
-                    self.main_loop_state = False
+                    self.main_loop_state = False # we dont quite let the code flush until we hit quit natrually
 
                 elif event.type == pygame.WINDOWSIZECHANGED:
                     for function in self.on_event_map[WINDOW_RESIZE]:
@@ -133,7 +132,6 @@ class Window():
             # excuate all the on update functions
             for function in self.on_update:
                 function(delta_time)
-
 
             pygame.display.update()
 
