@@ -19,10 +19,13 @@ class Square:
         self.size:float = 0 
 
 
-        self.board_pos: tuple[float, float]  = (0, 0) # (file, rank) grid coordinates
+        self.board_pos:tuple[float, float]  = (0, 0) # (file, rank) grid coordinates
 
-        self.pixel_pos: tuple[float, float] = (0, 0)    # (x, y) relative to  board origin, this is what 
+        self.pixel_pos:tuple[float, float] = (0, 0)    # (x, y) relative to  board origin, this is what 
                                                         # is used to display the piece on the board
+
+
+        self.is_highlighted = False # this well tell us if the user highlighted the square
 
         self.algebraic_notation:str = ""
 
@@ -95,7 +98,7 @@ class Square:
         px, py = self.pixel_pos
         w, h = self.size, self.size
 
-        if px <= x <= px + w and py <= y <= py + h:
+        if px < x < px + w and py < y < py + h:
             return True
         return False
     

@@ -20,9 +20,9 @@ class Piece:
 
         self.is_draging:list = False # this will indecate if the piece is being dragged 
 
-        self.board_pos: tuple[float, float] = None   # (file, rank) grid coordinates
-        self.pixel_pos: tuple[float, float] = None   # (x, y) relative to board origin
-        self.pixle_size: tuple[float, float] = None
+        self.board_pos:tuple[float, float] = None   # (file, rank) grid coordinates
+        self.pixel_pos:tuple[float, float] = None   # (x, y) relative to board origin
+        self.pixle_size:tuple[float, float] = None
 
         self.pos_transition_animation = EaseInOut()
         self.pos_transition_animation.duration = Setting.TRANSITION_TIME
@@ -100,7 +100,7 @@ class Piece:
         px, py = self.pixel_pos
         w, h = self.pixle_size
 
-        if px <= x <= px + w and py <= y <= py + h:
+        if px < x < px + w and py < y < py + h:
             return True
         return False
     

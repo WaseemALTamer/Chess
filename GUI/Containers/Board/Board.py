@@ -27,6 +27,11 @@ class Board:
         # this is call back section attach functions and this will run them for you
         self.on_piece_move_callbacks:list[callable] = []
 
+        # those are public var so  you can keep track of where you 
+        # pressed for the functions to  use on  the  run they will
+        # contain only mouse local pos not public window mouse pos
+        self.right_press_pos = (0, 0)
+        self.left_press_pos = (0, 0) 
 
 
     def setup_board(self):
@@ -84,13 +89,34 @@ class Board:
 
                 self.render_surface.blit(square.render_surface, square.pixel_pos) # build the squre surface and render them
 
-        # render the pieces in the squres we use another for loop
-        # so the pieces are on top of all the squres
+
+
+        # render the pieces that are dead first so they are at the bottom
+        for piece in self.dead_piece: # loop through the dead pieces and display them
+            if not piece: # for redundency
+                continue
+
+            piece.update() # update the pos transition
+
+            if piece.image_surface:
+                self.render_surface.blit(pygame.transform.smoothscale(piece.image_surface.convert_alpha(), 
+                                                                      (piece.pixle_size[0], piece.pixle_size[1])
+                                                                      ), 
+                                                                      piece.pixel_pos)
+
+
+        # render the pieces in the squres 
         for row in self.grid: # loop through the pieces
             for square in row:
                 if not square.piece:
                     continue
-                
+
+                if square.piece is self.selected_piece:
+                    continue  # skip, we draw it later on top even if you remove this code 
+                              # nothing will happen it it  will still look the same as the
+                              # piece it drawn twice on the same pos but if you have alpha
+                              # value this will lead to a problem
+
                 square.piece.update() # update the pos transition
 
                 square.piece.pixle_size = (square.size, square.size)
@@ -105,12 +131,10 @@ class Board:
                                                                           (square.size, square.size)
                                                                           ), 
                                                                           square.piece.pixel_pos)
-
-        
-        for piece in self.dead_piece: # loop through the dead pieces and display them
-            if not piece: # for redundency
-                continue
-
+            
+        # render the selected piece at the end so it is right at the top
+        if self.selected_piece:
+            piece = self.selected_piece
             piece.update() # update the pos transition
 
             if piece.image_surface:
@@ -118,6 +142,9 @@ class Board:
                                                                       (piece.pixle_size[0], piece.pixle_size[1])
                                                                       ), 
                                                                       piece.pixel_pos)
+
+        
+
 
 
 
@@ -154,7 +181,7 @@ class Board:
         self.render_surface.fill(Setting.BACKGROUND_COLOR)
 
         
-        square_size = board_size / Setting.BOARD_SQURE_WIDTH
+        square_size = board_size // Setting.BOARD_SQURE_WIDTH
 
         for row in self.grid:
             for square in row:
@@ -182,17 +209,24 @@ class Board:
     def on_mouse_press(self, event):
         if not self.render_rect:
             return
+        
+        local_x, local_y = event.pos
+        mouse_local = event.pos
+        if self.render_rect.collidepoint(event.pos):
+            local_x = event.pos[0] - self.render_rect.x
+            local_y = event.pos[1] - self.render_rect.y
+            mouse_local = (local_x, local_y)
+        else:
+            return
 
         if event.button == 1:
-
+            self.left_press_pos = mouse_local
             # check if we clicked on a possible_move squre for the selected piece
-            if self.render_rect.collidepoint(event.pos):
-                local_x = event.pos[0] - self.render_rect.x
-                local_y = event.pos[1] - self.render_rect.y
-                mouse_local = (local_x, local_y)
+            self.on_highlighted_square_interacted(mouse_local)
+            self.on_click_piece(mouse_local)
 
-                self.on_highlighted_square_interacted(mouse_local)
-                self.on_click_piece(mouse_local)
+        if event.button == 3:
+            self.right_press_pos = mouse_local
             
 
                         
@@ -202,13 +236,17 @@ class Board:
         if not self.render_rect:
             return
         
-        if event.button == 1:
-            if self.render_rect.collidepoint(event.pos):
-                local_x = event.pos[0] - self.render_rect.x
-                local_y = event.pos[1] - self.render_rect.y
-                mouse_local = (local_x, local_y)
+        local_x, local_y = event.pos
+        mouse_local = event.pos
+        if self.render_rect.collidepoint(event.pos):
+            local_x = event.pos[0] - self.render_rect.x
+            local_y = event.pos[1] - self.render_rect.y
+            mouse_local = (local_x, local_y)
+        else:
+            return
+        
 
-                
+        if event.button == 1: # left click button
                 # check if we rleased on a possible_move squre for the selected piece
                 self.on_highlighted_square_interacted(mouse_local)
 
@@ -222,45 +260,55 @@ class Board:
                             square.piece.transition_to_pos(square.pixel_pos) 
                             square.piece.is_draging = False
                             #square.piece.pixel_pos = None # reset the piece pos later on this will be a transition
+        
+        if event.button == 3:
+            for row in self.grid: # loop through the squres and check if we right clicked on them
+                for square in row:
+                    if square.in_bounds(mouse_local) and square.in_bounds(self.right_press_pos):
 
-                        
+                        self.hide_selected_piece_possible_moves()
+
+                        if not square.is_highlighted:
+                            square.transition_to_color(Setting.HIGHLIGHTED_SQUARE_COLOR)
+                            square.is_highlighted = True
+                        else:
+                            square.transition_to_color(square.base_color)
+                            square.is_highlighted = False
 
 
     def on_mouse_motion(self, event):
         if not self.render_rect:
             return
-
+        
+        local_x, local_y = event.pos
+        mouse_local = event.pos
         if self.render_rect.collidepoint(event.pos):
             local_x = event.pos[0] - self.render_rect.x
             local_y = event.pos[1] - self.render_rect.y
             mouse_local = (local_x, local_y)
+        else:
+            return
 
-            for row in self.grid:
-                for square in row:
-                    if not square.piece:
-                        continue
+
+        for row in self.grid:
+            for square in row:
+                if not square.piece:
+                    continue
+                
+                if square.piece.is_draging:
+                    x, y = mouse_local
+                    new_top_left = (x - square.piece.pixle_size[0]/2, y - square.piece.pixle_size[1]/2)
                     
-                    if square.piece.is_draging:
-                        x, y = mouse_local
-                        new_top_left = (x - square.piece.pixle_size[0]/2, y - square.piece.pixle_size[1]/2)
-                        square.piece.pixel_pos = new_top_left
-
-
-
-    def update_squares_colors(self):
-        """
-            this function is responsible for changing the colors
-        """
-
-        # this highlightes the squres for the possible moves, of the selected piece
-        for y, row in enumerate(self.grid):
-            for x, square in enumerate(row):
-                pos = (x, y)
-
-                if self.selected_piece and pos in self.selected_piece.possible_moves:
-                    square.transition_to_color(Setting.HIGHLIGHTED_SQUARE_COLOR)
-                else:
-                    square.transition_to_color(square.base_color)
+                    
+                    #square.piece.transition_to_pos(new_top_left) # this will transition the piece to where the cursor is
+                                                                    # this approch wont work when the  user wants to move a
+                                                                    # piece this will be  triggered multiple times while he
+                                                                    # is moving the piece it because it pauses the previous
+                                                                    # tranistion it makes the pieces stay in one place dont
+                                                                    # try to reimplement it it is a wast of time for now
+                    
+                    square.piece.pixel_pos = new_top_left
+                    square.piece.pos_transition_animation.stop_transition()
 
 
 
@@ -285,20 +333,50 @@ class Board:
                     square.piece.is_draging = True
                     x, y = pos
                     new_top_left = (x - square.piece.pixle_size[0]/2, y - square.piece.pixle_size[1]/2)
-                    square.piece.pixel_pos = new_top_left
+                    #square.piece.pixel_pos = new_top_left
+                    square.piece.transition_to_pos(new_top_left)
 
                     self.selected_piece = square.piece
                     _piece_got_pressed = True
 
                     # we over ride the animation just in case
-                    square.piece.pos_transition_animation.stop_transition()
+                    #square.piece.pos_transition_animation.stop_transition()
                     
         
         if not _piece_got_pressed:
             self.selected_piece = False
 
-        self.update_squares_colors()
+        self.reset_squares_colors()
+        self.show_selected_piece_possible_moves()
 
+
+
+    def reset_squares_colors(self):
+        """
+            this function is responsible for reset the colors of
+            the squres to there base color
+        """
+
+        # this highlightes the squres for the possible moves, of the selected piece
+        for y, row in enumerate(self.grid):
+            for x, square in enumerate(row):
+                square.transition_to_color(square.base_color)
+                square.is_highlighted = False
+
+    
+    def show_selected_piece_possible_moves(self):
+        for y, row in enumerate(self.grid):
+            for x, square in enumerate(row):
+                pos = (x, y)
+                if self.selected_piece and pos in self.selected_piece.possible_moves:
+                    square.transition_to_color(Setting.POSSIBLEMOVE_SQUARE_COLOR)
+    
+    def hide_selected_piece_possible_moves(self):
+        for y, row in enumerate(self.grid):
+            for x, square in enumerate(row):
+                pos = (x, y)
+                if self.selected_piece and pos in self.selected_piece.possible_moves:
+                    square.transition_to_color(square.base_color)
 
         
     def on_highlighted_square_interacted(self, pos):
@@ -322,7 +400,8 @@ class Board:
                             self.move_piece(self.selected_piece.board_pos, square.board_pos)
                             self.selected_piece = None
 
-        self.update_squares_colors() # this updates the color incase of no interaction
+                            self.reset_squares_colors() # this updates the color incase of no interaction
+        
 
 
     def move_piece(self, from_pos, to_pos): 

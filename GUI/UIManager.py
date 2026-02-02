@@ -36,7 +36,7 @@ window.on_event_map[MOUSE_UP].append(board.on_mouse_release)
 
 
 squre = board.grid[3][3] # pick a squre 
-p = Piece() # make a piece
+p = Piece() # make a psquare.is_highlighted = Trueiece
 p.image_surface = Assets.Images.ghost_pawn_surface.convert_alpha() # attach the surface image and make it an alpah surface
 p.board_pos = squre.board_pos
 p.possible_moves = [(1, 2), (3, 4), (3, 5), (2, 2), (0, 0)] # give the piece possible moves
