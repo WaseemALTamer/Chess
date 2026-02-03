@@ -2,8 +2,8 @@
 
 
 
-from TickSystem.Transitions.EaseInOut import EaseInOut
-import Setting
+from GUI.TickSystem.Transitions.EaseInOut import EaseInOut
+import GUI.Setting as Setting
 
 
 

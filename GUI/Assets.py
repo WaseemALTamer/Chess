@@ -1,6 +1,6 @@
 # this file is responsible for loading all the images as pygame surfaces
 
-import Setting
+from .Setting import *
 import pygame
 import os
 
@@ -11,7 +11,7 @@ import os
 
 class Images:
     file_dir = os.path.dirname(os.path.abspath(__file__))
-    pices_folder = os.path.join(file_dir, "Assets", "Pieces", Setting.PIECES_SET)
+    pices_folder = os.path.join(file_dir, "Assets", "Pieces", PIECES_SET)
 
     # responsible for the paths
     

@@ -3,9 +3,9 @@
 # to this file for the window everything will run on one thread
 
 
-from Constants import *
-from TickSystem import * 
-from Setting import *
+from .Constants import *
+from .TickSystem import * 
+from .Setting import *
 import pygame
 
 

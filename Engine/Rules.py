@@ -4,9 +4,9 @@
 
 
 
-from Board import Board
-from Pieces import *
-import Constants
+from .Board import Board
+from . import Constants
+from .Pieces import *
 import copy
 
 
@@ -58,6 +58,9 @@ class Rules:
 
                 target_piece  = board.get_piece(end_pos)
                 if isinstance(target_piece, Piece):
+                    if isinstance(piece, Pawn):
+                        continue # pawn doesnt capture forward at this point the pawn only moves forward and no capture moves
+
                     if target_piece.blocks_movement:
                         if target_piece.color == piece.color:
                             break # exit that ray and move to check another direction
@@ -80,7 +83,7 @@ class Rules:
             is exposed and will remove the move if the king is exposed
         """
 
-        current_turn_color = Rules.players_turn(board)
+        #current_turn_color = Rules.players_turn(board)
         
 
         for y, row in enumerate(board.grid):
@@ -89,6 +92,9 @@ class Rules:
                 if not piece:
                     continue
 
+                #if piece.color != current_turn_color:
+                #    continue
+
                 piece_pos = (x, y)
                 legal_moves = []
 
@@ -96,13 +102,33 @@ class Rules:
                     board_copy = Rules.copy_board(board)
                     Rules.apply_move(board_copy, piece_pos, move)
                     Rules.calculate_all_moves(board_copy) # recalculate the possible moves that can be made at a surface level
-                    king_pos = Rules.find_king(board_copy, current_turn_color)
-                    is_attacked = Rules.is_square_attacked(board_copy, king_pos, current_turn_color)
+                    Rules.calculate_pawns_capture_moves(board_copy) # this calculate the pawns capture moves if they are possible
+                    king_pos = Rules.find_king(board_copy, piece.color)
+                    is_attacked = Rules.is_square_attacked(board_copy, king_pos, piece.color)
                     if not is_attacked:
                         legal_moves.append(move)
                     
                 
                 piece.possible_moves = legal_moves
+
+
+    def filter_moves_by_turn(board:Board):
+        """
+            this removes all the possible moves for a set of pieces
+            where the turn is not theres
+        """
+
+        current_turn_color = Rules.players_turn(board)
+
+        for y, row in enumerate(board.grid):
+            for x, piece in enumerate(row):
+                
+                if not piece:
+                    continue
+
+                if piece.color != current_turn_color:
+                    piece.possible_moves = []
+
 
 
 
@@ -176,9 +202,9 @@ class Rules:
         """
 
         if board.move_index % 2:
-            return Constants.WHITE
-        else:
             return Constants.BLACK
+        else:
+            return Constants.WHITE
 
     
     @staticmethod
@@ -218,7 +244,7 @@ class Rules:
         if isinstance(piece, Pawn):
             pos_dif = board.coord_diff(from_pos, to_pos) # calculate the difference in the two coords
             dx, dy = pos_dif
-            if abs(dy) == 2:# this check if we moved up or down twice on the board
+            if abs(dy) == 2: # this check if we moved up or down twice on the board
                 pos_mid = board.coord_mid(from_pos, to_pos)
                 ghost_pawn = GhostPawn(piece)
                 board.set_piece(pos_mid, ghost_pawn)
@@ -319,5 +345,6 @@ class Rules:
         Rules.calculate_all_moves(board) # calculates surface moves no king safty concern
         Rules.calculate_all_special_moves(board) # this will get all the special moves
         Rules.filter_king_safety(board) # removes that moves that puts the king under attack
+        #Rules.filter_moves_by_turn(board) # this filters the pieces that dont have turn
 
 

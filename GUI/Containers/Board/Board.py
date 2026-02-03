@@ -1,6 +1,6 @@
 from .Square import Square
 from .Piece import Piece
-import Setting 
+import GUI.Setting as Setting
 import pygame
 
 
@@ -25,7 +25,9 @@ class Board:
 
 
         # this is call back section attach functions and this will run them for you
-        self.on_piece_move_callbacks:list[callable] = []
+        # this function expect two pramatesr
+        self.on_piece_move_callbacks:list[callable[int, int]] = []
+
 
         # those are public var so  you can keep track of where you 
         # pressed for the functions to  use on  the  run they will
@@ -442,3 +444,8 @@ class Board:
         #piece_to_move = None # this forces it to appear on the squre
 
         piece_to_move.transition_to_pos(to_square.pixel_pos)
+
+
+        # run the call function for when a piece is moved
+        for function in self.on_piece_move_callbacks:
+            function(from_pos, to_pos)

@@ -1,5 +1,5 @@
-from Constants import *
-from Pieces import *
+from .Constants import *
+from .Pieces import *
 
 
 

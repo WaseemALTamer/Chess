@@ -1,10 +1,11 @@
 from Containers.Board.Board import Board, Piece
 from Window import Window
+import Assets as Assets
 from Constants import *
 import Setting 
 import pygame
 
-import Assets as Assets
+
 
 
 
@@ -34,6 +35,7 @@ window.on_event_map[MOUSE_DOWN].append(board.on_mouse_press)
 window.on_event_map[MOUSE_UP].append(board.on_mouse_release)
 
 
+# we make a simple game here just for show case on how to use
 
 squre = board.grid[3][3] # pick a squre 
 p = Piece() # make a psquare.is_highlighted = Trueiece
