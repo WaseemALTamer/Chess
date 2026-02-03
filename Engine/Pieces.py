@@ -1,5 +1,5 @@
 from .Constants import *
-
+import copy
 
 
 
@@ -18,6 +18,10 @@ class Piece: # all the pieces are going to inheritance this class
         self.has_moved:int = 0 # 0 means it didnt move and it is increamented as we move the piece
         self.life_span = -1
         self.state = ALIVE
+
+        self.piece_to_track:... = None # this will hold the piece that you are going to track
+                                       # at an upper level this var  is not  used through the
+                                       # engine it self it is up to you to set it to anything
 
         self.possible_moves: list[tuple[int, int]] = []
         self.capture_directions = [] # this will be used for the pawns to specify capture directions for the special move
@@ -42,6 +46,35 @@ class Piece: # all the pieces are going to inheritance this class
         self.has_moved += 1
         for function in self.on_move:
             function() 
+
+
+    def __deepcopy__(self, memo):
+        # Create a brand-new object (no copying of self)
+        new_obj = type(self)(self.color)
+
+        # Register in memo to handle potential circular refs
+        memo[id(self)] = new_obj
+
+
+        new_obj.has_moved = self.has_moved
+        new_obj.life_span = self.life_span
+        new_obj.state = self.state
+
+        new_obj.move_direction_x = self.move_direction_x
+        new_obj.move_direction_y = self.move_direction_y
+
+        # Deep-copy only the collections that matter
+        new_obj.possible_moves = copy.deepcopy(self.possible_moves, memo)
+        new_obj.capture_directions = copy.deepcopy(self.capture_directions, memo)
+
+        # Event hooks (if needed)
+        new_obj.on_kill = self.on_kill[:]   # shallow copy = fast
+        new_obj.on_move = self.on_move[:]
+
+        # ---- explicitly ignored ----
+        new_obj.piece_to_track = None
+
+        return new_obj
 
 
 
@@ -178,6 +211,35 @@ class GhostPawn(Piece):
         self.base_move_rays = [] # no moves
 
         self.on_kill.append(lambda: self.linked_pawn.kill_trigger()) # subscribe to the pawn kill event to kill the pawn
+
+
+    def __deepcopy__(self, memo): # over ride the deep copy as it this GhostPawn takes different pramaters
+        # Create a brand-new object
+        new_obj = type(self)(self.linked_pawn)
+
+        # Register in memo to handle potential circular refs
+        memo[id(self)] = new_obj
+
+
+        new_obj.has_moved = self.has_moved
+        new_obj.life_span = self.life_span
+        new_obj.state = self.state
+
+        new_obj.move_direction_x = self.move_direction_x
+        new_obj.move_direction_y = self.move_direction_y
+
+        # Deep-copy only the collections that matter
+        new_obj.possible_moves = copy.deepcopy(self.possible_moves, memo)
+        new_obj.capture_directions = copy.deepcopy(self.capture_directions, memo)
+
+        # Event hooks (if needed)
+        new_obj.on_kill = self.on_kill[:]   # shallow copy = fast
+        new_obj.on_move = self.on_move[:]
+
+        # ---- explicitly ignored ----
+        new_obj.piece_to_track = None
+
+        return new_obj
 
 
 

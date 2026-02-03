@@ -267,7 +267,7 @@ class Board:
             for row in self.grid: # loop through the squres and check if we right clicked on them
                 for square in row:
                     if square.in_bounds(mouse_local) and square.in_bounds(self.right_press_pos):
-
+                        
                         self.hide_selected_piece_possible_moves()
 
                         if not square.is_highlighted:
@@ -379,6 +379,8 @@ class Board:
                 pos = (x, y)
                 if self.selected_piece and pos in self.selected_piece.possible_moves:
                     square.transition_to_color(square.base_color)
+        
+        self.selected_piece = None
 
         
     def on_highlighted_square_interacted(self, pos):
@@ -427,6 +429,23 @@ class Board:
 
         self.grid[from_pos[1]][from_pos[0]].piece = None # remove the pieces refrence from the squre
 
+        self.set_piece_pos(piece_to_move, to_pos) # this will set the piece to the new pos
+
+
+        # run the call function for when a piece is moved
+        for function in self.on_piece_move_callbacks:
+            function(from_pos, to_pos)
+
+    
+    def set_piece_pos(self, piece, to_pos):
+        """
+            this function will take a  piece and  take its pos
+            and set the piece to that pos this function is not
+            cnosidered  a  move  and  is  not interacted  with
+            through the ui 
+        """
+
+
         to_square = self.grid[to_pos[1]][to_pos[0]]
 
         if to_square.piece:
@@ -434,18 +453,13 @@ class Board:
             to_square.piece.hide() 
             pass
 
-        to_square.piece = piece_to_move # append the piece to move
+        to_square.piece = piece # append the piece to move
 
-        piece_to_move.board_pos = to_square.board_pos
+        piece.board_pos = to_square.board_pos
         
         
         # this next two lines need to be replaced by a transition effect
         #piece_to_move.pixle_size = to_square.pixel_pos
         #piece_to_move = None # this forces it to appear on the squre
 
-        piece_to_move.transition_to_pos(to_square.pixel_pos)
-
-
-        # run the call function for when a piece is moved
-        for function in self.on_piece_move_callbacks:
-            function(from_pos, to_pos)
+        piece.transition_to_pos(to_square.pixel_pos)

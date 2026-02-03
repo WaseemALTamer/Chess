@@ -59,7 +59,7 @@ class Rules:
                 target_piece  = board.get_piece(end_pos)
                 if isinstance(target_piece, Piece):
                     if isinstance(piece, Pawn):
-                        continue # pawn doesnt capture forward at this point the pawn only moves forward and no capture moves
+                        break # pawn doesnt capture forward at this point the pawn only moves forward and no capture moves
 
                     if target_piece.blocks_movement:
                         if target_piece.color == piece.color:

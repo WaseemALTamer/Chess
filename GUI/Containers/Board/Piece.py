@@ -15,6 +15,7 @@ class Piece:
         self.image_surface = None # this will contain a pygame surface the user decide
                                   # the surface make sure that <set_alpha(value)> is a 
                                   # function
+                                  
 
         self.possible_moves:list[tuple] = []
 
