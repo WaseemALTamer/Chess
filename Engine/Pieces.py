@@ -87,7 +87,7 @@ class King(Piece):
 
         self.blocks_movement = True
         self.base_move_rays =   [
-            [(1,-1)], [(0,1)], [(1,1)],
+            [(-1,1)], [(0,1)], [(1,1)],
             [(-1,0)],          [(1,0)],
             [(-1,-1)],[(0,-1)],[(1,-1)]
         ]
@@ -240,6 +240,7 @@ class GhostPawn(Piece):
         new_obj.piece_to_track = None
 
         return new_obj
+
 
 
 
